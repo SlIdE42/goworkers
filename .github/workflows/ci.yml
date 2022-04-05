@@ -1,0 +1,69 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.16
+
+      - name: Run coverage
+        run: go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+
+      - name: Upload coverage to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.16
+
+      - name: Build
+        run: go build -v ./...
+
+  docs:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Update readme according to Go doc
+      uses: posener/goreadme@e713475bae0c17d5083f4378c5e53d6c66d74c74
+      with:
+        badge-codecov: true
+        badge-godoc: true
+        badge-github: "ci.yml"
+        badge-goreportcard: true
+        badge-travisci: false
+        badge-golangci: true
+        # commit-message: 'improvement(docs): updated docs'
+        types: true
+        functions: true
+        credit: false
+        # Optional: Token allows goreadme to comment the PR with diff preview.
+        # GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
