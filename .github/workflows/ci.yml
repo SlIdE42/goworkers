@@ -64,6 +64,7 @@ jobs:
         # commit-message: 'improvement(docs): updated docs'
         types: true
         functions: true
+        methods: true
         credit: false
         # Optional: Token allows goreadme to comment the PR with diff preview.
         # GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
